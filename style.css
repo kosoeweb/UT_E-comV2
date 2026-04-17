@@ -177,3 +177,38 @@ header { background-color: #222; padding: 15px 40px; display: flex; justify-cont
 @media screen and (max-width: 400px) {
     .product-grid { grid-template-columns: 1fr !important; }
 }
+/* ========================================= */
+/* 🛠️ Bug Fix for Detail Images on Mobile 🛠️ */
+/* ========================================= */
+@media screen and (max-width: 768px) {
+    /* ပုံအကြီး (Main Image) နေရာမှန်ပြီး သေချာပေါ်စေရန် */
+    #detailMainImg {
+        width: 100% !important;
+        height: 250px !important; /* ဖုန်းမှာ အမြင့်ကို သတ်မှတ်ထားမည် */
+        max-height: 250px !important;
+        object-fit: contain !important;
+        display: block !important;
+        margin: 0 auto 15px auto !important;
+        background-color: #f9f9f9 !important;
+    }
+
+    /* ပုံအသေးလေးများ (Thumbnails) အလယ်မှာ လှလှပပစီနေစေရန် */
+    #detailThumbs {
+        display: flex !important;
+        justify-content: center !important; /* အလယ်ဗဟိုမှာ စုထားရန် */
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+        width: 100% !important;
+    }
+    
+    #detailThumbs img {
+        width: 60px !important;
+        height: 60px !important;
+        max-height: 60px !important;
+        object-fit: cover !important;
+        display: block !important;
+        margin: 0 !important;
+        border: 2px solid #ddd !important;
+        border-radius: 4px !important;
+    }
+}
