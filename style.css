@@ -212,3 +212,21 @@ header { background-color: #222; padding: 15px 40px; display: flex; justify-cont
         border-radius: 4px !important;
     }
 }
+/* ========================================= */
+/* 🛠️ Hero Banner Fix for Mobile 🛠️ */
+/* ========================================= */
+@media screen and (max-width: 768px) {
+    /* ဖုန်းမျက်နှာပြင်နဲ့ အံဝင်စေရန် Slider အမြင့်ကို လျှော့ချမည် */
+    .hero-slider {
+        height: 220px !important; 
+        background: transparent !important;
+    }
+    
+    /* Banner ပုံများ ဘေးဘောင်ပြတ်မထွက်သွားစေရန် (contain သုံးထားသည်) */
+    #frontSliderWrapper img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: contain !important; 
+        background-color: #f4f7f6 !important;
+    }
+}
