@@ -230,3 +230,22 @@ header { background-color: #222; padding: 15px 40px; display: flex; justify-cont
         background-color: #f4f7f6 !important;
     }
 }
+
+/* ========================================= */
+/* 🖥️ Desktop (Web View) Banner Fix 🖥️ */
+/* ========================================= */
+@media screen and (min-width: 769px) {
+    .hero-slider {
+        /* မူလအမြင့် 450px ကို ထိန်းထားမည် (သို့မဟုတ် လိုအပ်သလို ပြင်နိုင်ပါသည်) */
+        height: 450px !important; 
+        /* ပုံအချိုးအစားကြောင့် ဘေးမှာ နေရာလွတ်ကျန်ခဲ့ရင် ကြည့်ကောင်းအောင် နောက်ခံအရောင် ရင့်ရင့်လေး ခံထားပါမည် */
+        background-color: #1a1a1a !important; 
+    }
+    
+    #frontSliderWrapper img {
+        width: 100% !important;
+        height: 100% !important;
+        /* အရေးကြီးဆုံးအပိုင်း: ပုံကို ဖြတ်မချဘဲ (Crop မလုပ်ဘဲ) အပြည့်အစုံပေါ်စေပါမည် */
+        object-fit: contain !important; 
+    }
+}
