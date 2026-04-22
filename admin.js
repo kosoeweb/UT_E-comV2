@@ -89,7 +89,7 @@ window.syncWithWMS = async function(isAuto = false) {
 }
 
 // ==========================================
-// 2. INVENTORY & DELETE
+// 2. INVENTORY, HIDE & SEARCH
 // ==========================================
 let currentProducts = [];
 
@@ -102,27 +102,59 @@ async function loadInventory() {
         let img = (p.images && p.images.length > 0) ? p.images[0] : (p.photoUrl || 'https://via.placeholder.com/50');
         let subcatHtml = p.subcat ? `<br><small style="color:#ff6600;">${p.subcat}</small>` : '';
         
+        // ဖျောက်ထားသော ပစ္စည်းဖြစ်ပါက အရောင်မှိန်သွားစေရန်နှင့် ခလုတ်စာသား ပြောင်းရန်
+        let isHidden = p.is_hidden === true;
+        let rowOpacity = isHidden ? '0.5' : '1';
+        let hideBtnText = isHidden ? '👁️ Unhide' : '🚫 Hide';
+        let hideBtnColor = isHidden ? '#7f8c8d' : '#e74c3c';
+
+        // Search Filter လုပ်ရာတွင် လွယ်ကူစေရန် Class များ ထည့်ပေးထားပါသည်
         return `
-        <tr>
-            <td><b>${p.code || 'N/A'}</b></td>
+        <tr style="opacity: ${rowOpacity}; transition: 0.3s;" class="admin-inv-row">
+            <td class="inv-code"><b>${p.code || 'N/A'}</b></td>
             <td><img src="${img}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;"></td>
-            <td>${p.name || ''}</td>
-            <td>${p.cat || 'N/A'} ${subcatHtml}</td>
+            <td class="inv-name">${p.name || ''}</td>
+            <td class="inv-cat">${p.cat || 'N/A'} ${subcatHtml}</td>
             <td style="color:#ff6600; font-weight:bold;">MMK ${(p.price || 0).toLocaleString()}</td>
             <td style="font-weight:bold; color:${p.stock_quantity > 0 ? 'green':'red'}">${p.stock_quantity || 0}</td>
             <td>
                 <button onclick="openEdit(${p.id})" style="background:#f39c12; color:white; border:none; padding:5px 8px; border-radius:4px; cursor:pointer;">Edit Price/Photo</button>
-                <button onclick="deleteProduct(${p.id})" style="background:#e74c3c; color:white; border:none; padding:5px 8px; border-radius:4px; cursor:pointer;">Delete</button>
+                <button onclick="toggleHideStatus(${p.id}, ${isHidden})" style="background:${hideBtnColor}; color:white; border:none; padding:5px 8px; border-radius:4px; cursor:pointer;">${hideBtnText}</button>
             </td>
         </tr>`;
     }).join('');
 }
 
-window.deleteProduct = async function(id) {
-    if(!confirm("Are you sure you want to delete this product?")) return;
-    const { error } = await db.from('ecom_products').delete().eq('id', id);
-    if(error) alert("Error deleting: " + error.message);
-    else { alert("Product Deleted!"); loadInventory(); }
+// ပစ္စည်းကို ဖျောက်ခြင်း / ပြန်ဖော်ခြင်း စနစ် (Delete အစား)
+window.toggleHideStatus = async function(id, currentStatus) {
+    const newStatus = !currentStatus;
+    const confirmMsg = newStatus ? "ဤပစ္စည်းကို Shop တွင် မပေါ်အောင် ဖျောက်ထားမည် သေချာပါသလား?" : "ဤပစ္စည်းကို Shop တွင် ပြန်ဖော်ပြမည် သေချာပါသလား?";
+    
+    if(!confirm(confirmMsg)) return;
+    
+    const { error } = await db.from('ecom_products').update({ is_hidden: newStatus }).eq('id', id);
+    
+    if(error) alert("Error updating status: " + error.message);
+    else loadInventory(); // အောင်မြင်ပါက Table ကို Refresh ပြန်လုပ်မည်
+}
+
+// စာရိုက်လိုက်တာနဲ့ ချက်ချင်းရှာပေးမည့် Search Filter စနစ်
+window.filterAdminInventory = function() {
+    let input = document.getElementById('adminSearchInput').value.toLowerCase();
+    let rows = document.querySelectorAll('.admin-inv-row');
+
+    rows.forEach(row => {
+        let code = row.querySelector('.inv-code').innerText.toLowerCase();
+        let name = row.querySelector('.inv-name').innerText.toLowerCase();
+        let cat = row.querySelector('.inv-cat').innerText.toLowerCase();
+
+        // Code, Name သို့မဟုတ် Category တစ်ခုခုနဲ့ ကိုက်ညီရင် ပြထားမည်၊ မကိုက်ရင် ဖျောက်ထားမည်
+        if(code.includes(input) || name.includes(input) || cat.includes(input)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
 }
 
 window.openEdit = function(id) {
