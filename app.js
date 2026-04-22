@@ -271,6 +271,9 @@ function renderProducts(products) {
 // ==========================================
 // SEARCH LOGIC
 // ==========================================
+// ==========================================
+// SEARCH LOGIC
+// ==========================================
 window.searchProducts = async function(keyword) {
     const catMenu = document.getElementById('categoryMenu');
     if(catMenu) {
