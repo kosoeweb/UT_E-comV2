@@ -108,7 +108,7 @@ async function loadInventory() {
             <td><img src="${img}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;"></td>
             <td>${p.name || ''}</td>
             <td>${p.cat || 'N/A'} ${subcatHtml}</td>
-            <td style="color:#ff6600; font-weight:bold;">$${p.price || 0}</td>
+            <td style="color:#ff6600; font-weight:bold;">MMK ${(p.price || 0).toLocaleString()}</td>
             <td style="font-weight:bold; color:${p.stock_quantity > 0 ? 'green':'red'}">${p.stock_quantity || 0}</td>
             <td>
                 <button onclick="openEdit(${p.id})" style="background:#f39c12; color:white; border:none; padding:5px 8px; border-radius:4px; cursor:pointer;">Edit Price/Photo</button>
@@ -221,7 +221,7 @@ async function fetchOrders() {
                 <td>${new Date(o.created_at).toLocaleDateString()}</td>
                 <td>#${o.order_id}</td> 
                 <td>${o.customer_name || 'N/A'}<br>${o.customer_phone || ''}</td>
-                <td style="color:var(--primary-color); font-weight:bold;">$${o.total_amount || 0}</td>
+                <td style="color:var(--primary-color); font-weight:bold;">MMK ${(o.total_amount || 0).toLocaleString()}</td>
                 <td><span style="background:#eee; padding:4px 8px; border-radius:4px; font-weight:bold;">${o.status || 'Pending'}</span></td>
                 <td><button onclick="viewOrder(${o.order_id})" style="background:#333; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">View</button></td>
             </tr>
@@ -257,16 +257,16 @@ window.viewOrder = function(id) {
             let safeName = itemName.replace(/'/g, "&apos;").replace(/"/g, "&quot;");
             return `<tr>
                 <td>${safeName}</td>
-                <td>$${i.price || 0}</td>
+                <td>MMK ${(i.price || 0).toLocaleString()}</td>
                 <td>${i.qty || 0}</td>
-                <td>$${((i.price || 0) * (i.qty || 0)).toFixed(2)}</td>
+                <td>MMK ${((i.price || 0) * (i.qty || 0)).toLocaleString()}</td>
             </tr>`;
         }).join('');
     } else {
         tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#888;">No items found in this order.</td></tr>';
     }
 
-    document.getElementById('orderTotalDisplay').innerText = o.total_amount || 0;
+    document.getElementById('orderTotalDisplay').innerText = (o.total_amount || 0).toLocaleString();
     document.getElementById('orderStatusSelect').value = o.status || 'Pending';
     document.getElementById('orderDetailModal').style.display = 'flex';
 }
