@@ -229,12 +229,15 @@ function startHeroSlider(totalSlides) { if(totalSlides <= 1) return; resetSlider
 // ==========================================
 // 5. PRODUCTS & SEARCH LOGIC
 // ==========================================
+// ==========================================
+// PRODUCTS & SEARCH LOGIC
+// ==========================================
 async function fetchProducts() {
-    // .neq စာကြောင်းကို ဖြုတ်လိုက်ပါမည်
+    // ပစ္စည်းများကို Category အလိုက် အစုံပြနိုင်ရန် limit ကို ၁၀၀ မှ ၃၀၀ သို့ တိုးထားပါသည်
     const { data: products, error } = await db.from('ecom_products')
         .select('*')
         .order('code', { ascending: true })
-        .limit(100); 
+        .limit(300); 
         
     if (error) {
         const grid = document.getElementById('productGrid');
@@ -242,39 +245,79 @@ async function fetchProducts() {
         return;
     }
 
-    // Database ကရလာတဲ့ Data များထဲမှ is_hidden အမှန်ခြစ်ထားသော (true ဖြစ်နေသော) ပစ္စည်းများကို JavaScript ဖြင့် ဖယ်ထုတ်ပါမည်
     const visibleProducts = (products || []).filter(p => p.is_hidden !== true);
-    
     allProducts = visibleProducts;
-    renderProducts(allProducts);
+
+    // ပင်မစာမျက်နှာအတွက် Category အလိုက် အုပ်စုခွဲပြမည် (true)
+    renderProducts(allProducts, true);
 }
 
-function renderProducts(products) {
-    const grid = document.getElementById('productGrid');
-    if(!grid) return;
+// isGrouped = true ဆိုလျှင် Category အလိုက်ပြမည်၊ false ဆိုလျှင် ပုံမှန်အတိုင်း အကုန်တန်းစီပြမည်
+function renderProducts(products, isGrouped = false) {
+    const container = document.getElementById('productGrid');
+    if(!container) return;
+
     if(products.length === 0) {
-        grid.innerHTML = '<p style="text-align:center; width:100%;">No products found.</p>';
+        container.style.display = 'block';
+        container.innerHTML = '<p style="text-align:center; width:100%; padding: 50px;">No products found.</p>';
         return;
     }
-    
-    grid.innerHTML = products.map(p => {
-        let img = (p.images && p.images.length > 0) ? p.images[0] : (p.photoUrl || 'https://via.placeholder.com/200');
-        let safeName = (p.name || '').replace(/'/g, "\\'");
-        return `
-        <div class="product-card" onclick="openProductDetail(${p.id})">
-            <img src="${img}" class="product-image" loading="lazy" alt="Product">
-            <div class="product-info">
-                <h3>${p.name || 'Unnamed'}</h3>
-                <div class="price">MMK ${(p.price || 0).toLocaleString()}</div>
-                <button class="add-to-cart-btn" onclick="event.stopPropagation(); addToCart(${p.id}, '${safeName}', ${p.price}, '${img}')">Add to Cart</button>
-            </div>
-        </div>`;
-    }).join('');
+
+    // Product Card ရေးဆွဲသည့် Function
+    const createCards = (items) => {
+        return items.map(p => {
+            let img = (p.images && p.images.length > 0) ? p.images[0] : (p.photoUrl || 'https://via.placeholder.com/200');
+            let safeName = (p.name || '').replace(/'/g, "\\'");
+            return `
+            <div class="product-card" onclick="openProductDetail(${p.id})">
+                <img src="${img}" class="product-image" loading="lazy" alt="Product">
+                <div class="product-info">
+                    <h3>${p.name || 'Unnamed'}</h3>
+                    <div class="price">MMK ${(p.price || 0).toLocaleString()}</div>
+                    <button class="add-to-cart-btn" onclick="event.stopPropagation(); addToCart(${p.id}, '${safeName}', ${p.price}, '${img}')">Add to Cart</button>
+                </div>
+            </div>`;
+        }).join('');
+    };
+
+    if (isGrouped) {
+        container.style.display = 'block'; // မူလ Grid ကို ဖြုတ်ပြီး အထက်အောက် စီမည်
+
+        // Category အလိုက် အုပ်စုခွဲခြင်း
+        const grouped = {};
+        products.forEach(p => {
+            let c = p.cat ? p.cat.trim() : 'Others';
+            if (!grouped[c]) grouped[c] = [];
+            grouped[c].push(p);
+        });
+
+        let html = '';
+        for (let cat in grouped) {
+            let catProducts = grouped[cat];
+            let displayProducts = catProducts.slice(0, 5); // တစ်အုပ်စုလျှင် ၅ ခုသာ ယူမည်
+            
+            html += `
+            <div style="margin-bottom: 40px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary-color, #ff6600); margin-bottom: 20px; padding-bottom: 10px;">
+                    <h2 style="margin: 0; font-size: 22px; color: #333;">📁 ${cat}</h2>
+                    <button onclick="searchProducts('${cat}')" style="background: transparent; color: var(--primary-color, #ff6600); border: 1px solid var(--primary-color, #ff6600); padding: 6px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.3s;">See More ➔</button>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">
+                    ${createCards(displayProducts)}
+                </div>
+            </div>`;
+        }
+        container.innerHTML = html;
+
+    } else {
+        // Search လုပ်သည့်အခါနှင့် See More နှိပ်သည့်အခါ ပုံမှန် Grid အတိုင်း ပြန်ပြမည်
+        container.style.display = 'grid';
+        container.style.gridTemplateColumns = 'repeat(auto-fill, minmax(200px, 1fr))';
+        container.style.gap = '20px';
+        container.innerHTML = createCards(products);
+    }
 }
 
-// ==========================================
-// SEARCH LOGIC
-// ==========================================
 window.searchProducts = async function(keyword) {
     const catMenu = document.getElementById('categoryMenu');
     if(catMenu) {
@@ -286,29 +329,38 @@ window.searchProducts = async function(keyword) {
     const btn = document.getElementById('loadMoreBtn');
     
     if(!keyword) {
+        // Search box ရှင်းလိုက်လျှင် Home Page ပုံစံအတိုင်း ပြန်ပြမည်
         fetchProducts(); 
         return;
     }
     
     if(btn) btn.style.display = 'none';
-    if(grid) grid.innerHTML = '<p style="text-align:center; width:100%;">Searching...</p>';
+    if(grid) {
+        grid.style.display = 'block';
+        grid.innerHTML = '<p style="text-align:center; width:100%; padding: 50px;">Searching...</p>';
+    }
     
-    // .neq စာကြောင်းကို ဖြုတ်လိုက်ပါမည်
     const { data: filteredData, error } = await db.from('ecom_products')
         .select('*')
         .or(`name.ilike.%${keyword}%,code.ilike.%${keyword}%,cat.ilike.%${keyword}%,subcat.ilike.%${keyword}%`)
-        .limit(30);
+        .limit(100);
         
     if(error) { 
         if(grid) grid.innerHTML = '<p style="color:red;text-align:center;">Search Error.</p>'; 
         return; 
     }
     
-    // ရှာလို့ရလာတဲ့ အထဲကမှ is_hidden အမှန်ခြစ်ထားသော (true ဖြစ်နေသော) ပစ္စည်းများကို ဖယ်ထုတ်ပါမည်
     const visibleFiltered = (filteredData || []).filter(p => p.is_hidden !== true);
-
     allProducts = visibleFiltered; 
-    renderProducts(visibleFiltered);
+    
+    // Search ရလဒ်ဖြစ်သဖြင့် isGrouped ကို false ထား၍ တန်းစီပြမည်
+    renderProducts(visibleFiltered, false);
+
+    // ခေါင်းစဉ်တပ်ပေးခြင်း (See More သို့မဟုတ် Search)
+    if (grid && visibleFiltered.length > 0) {
+        const titleHtml = `<h2 style="width: 100%; grid-column: 1 / -1; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px;">Results for: <span style="color:var(--primary-color, #ff6600);">${keyword}</span></h2>`;
+        grid.insertAdjacentHTML('afterbegin', titleHtml);
+    }
 }
 
 // ==========================================
