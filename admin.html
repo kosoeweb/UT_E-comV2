@@ -43,9 +43,11 @@
 
         <div id="products" class="tab-content" style="display: none;">
             <h2>Inventory Management</h2>
-            <div class="settings-card" style="margin-bottom: 20px;">
-                <button onclick="syncWithWMS()" class="checkout-btn" style="background: #007bff; width: auto; margin-right: 15px;">🔄 Sync Data from WMS</button>
-            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+    		<button onclick="syncWithWMS()" class="checkout-btn" style="margin: 0; width: auto; background: #2196F3;">🔄 Sync Data from WMS</button>
+    
+    		<input type="text" id="adminSearchInput" onkeyup="filterAdminInventory()" placeholder="Search Code, Name or Category..." class="auth-input" style="width: 300px; margin: 0; border: 1px solid #ccc;">
+		</div>
 
             <div style="overflow-x: auto;">
                 <table class="admin-table">
