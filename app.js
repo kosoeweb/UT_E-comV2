@@ -268,15 +268,15 @@ function renderProducts(products) {
     }).join('');
 }
 
+// ==========================================
+// SEARCH LOGIC
+// ==========================================
 window.searchProducts = async function(keyword) {
-    const { data: filtered, error } = await db.from('ecom_products')
-        .select('*')
-        .neq('is_hidden', true) // <--- ဖျောက်ထားသော ပစ္စည်းများကို ဖယ်ထုတ်မည့် စာကြောင်း
-        .or(`name.ilike.%${keyword}%,code.ilike.%${keyword}%,cat.ilike.%${keyword}%,subcat.ilike.%${keyword}%`)
-        .limit(30);
-
-    // Search လုပ်သည့်အခါ Main Page ကို သေချာပေါက်ပြန်ပြပေးရန်
-    goBackToMain();
+    const catMenu = document.getElementById('categoryMenu');
+    if(catMenu) {
+        catMenu.style.display = 'none'; 
+        setTimeout(() => catMenu.style.display = '', 200); 
+    }
 
     const grid = document.getElementById('productGrid');
     const btn = document.getElementById('loadMoreBtn');
@@ -287,17 +287,22 @@ window.searchProducts = async function(keyword) {
     }
     
     if(btn) btn.style.display = 'none';
-    grid.innerHTML = '<p style="text-align:center; width:100%;">Searching...</p>';
+    if(grid) grid.innerHTML = '<p style="text-align:center; width:100%;">Searching...</p>';
     
-    const { data: filtered, error } = await db.from('ecom_products')
+    // နာမည်ထပ်နေသည့် Error မဖြစ်စေရန် filtered အစား filteredData ဟု ပြောင်းရေးထားပါသည်
+    const { data: filteredData, error } = await db.from('ecom_products')
         .select('*')
+        .neq('is_hidden', true)
         .or(`name.ilike.%${keyword}%,code.ilike.%${keyword}%,cat.ilike.%${keyword}%,subcat.ilike.%${keyword}%`)
         .limit(30);
         
-    if(error) { grid.innerHTML = '<p style="color:red;text-align:center;">Search Error.</p>'; return; }
+    if(error) { 
+        if(grid) grid.innerHTML = '<p style="color:red;text-align:center;">Search Error.</p>'; 
+        return; 
+    }
     
-    allProducts = filtered || []; 
-    renderProducts(filtered);
+    allProducts = filteredData || []; 
+    renderProducts(filteredData);
 }
 
 // ==========================================
