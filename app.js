@@ -260,7 +260,7 @@ function renderProducts(products) {
             <img src="${img}" class="product-image" loading="lazy" alt="Product">
             <div class="product-info">
                 <h3>${p.name || 'Unnamed'}</h3>
-                <div class="price">$${p.price || 0}</div>
+                <div class="price">MMK ${(p.price || 0).toLocaleString()}</div>
                 <button class="add-to-cart-btn" onclick="event.stopPropagation(); addToCart(${p.id}, '${safeName}', ${p.price}, '${img}')">Add to Cart</button>
             </div>
         </div>`;
@@ -309,7 +309,7 @@ window.openProductDetail = function(id) {
     // အချက်အလက်များ ထည့်သွင်းခြင်း
     document.getElementById('detailName').innerText = p.name || 'Unknown';
     document.getElementById('detailCode').innerText = p.code || 'N/A';
-    document.getElementById('detailPrice').innerText = '$' + (p.price || 0);
+    document.getElementById('detailPrice').innerText = 'MMK ' + (p.price || 0).toLocaleString();
     document.getElementById('detailStock').innerText = p.stock_quantity || 0;
     
     let imgs = (p.images && p.images.length > 0) ? p.images : (p.photoUrl ? [p.photoUrl] : ['https://via.placeholder.com/400']);
@@ -364,11 +364,11 @@ function updateCart() {
     if(cartItems) {
         cartItems.innerHTML = cart.map(i => {
             total += i.price * i.qty;
-            return `<div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;"><img src="${i.img}" style="width:50px;height:50px;object-fit:cover;border-radius:4px;"><div style="flex-grow:1;"><h4 style="margin:0; font-size:14px;">${i.name}</h4><p style="margin:0; color:#ff6600;">$${i.price} x ${i.qty}</p></div><button onclick="removeFromCart(${i.id})" style="border:none;background:red;color:white;cursor:pointer;padding:5px 8px;border-radius:4px;">X</button></div>`;
+            return `<div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;"><img src="${i.img}" style="width:50px;height:50px;object-fit:cover;border-radius:4px;"><div style="flex-grow:1;"><h4 style="margin:0; font-size:14px;">${i.name}</h4><p style="margin:0; color:#ff6600;">MMK ${i.price.toLocaleString()} x ${i.qty}</p></div><button onclick="removeFromCart(${i.id})" style="border:none;background:red;color:white;cursor:pointer;padding:5px 8px;border-radius:4px;">X</button></div>`;
         }).join('');
     }
     const cartTotal = document.getElementById('cartTotal');
-    if(cartTotal) cartTotal.innerText = total.toFixed(2);
+    if(cartTotal) cartTotal.innerText = total.toLocaleString();
 }
 
 window.submitOrder = async function() {
