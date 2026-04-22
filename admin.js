@@ -1,3 +1,7 @@
+const supabaseUrl = 'https://zdifzvpjmmmsfitjsraw.supabase.co';
+const supabaseKey = 'sb_publishable_Eghy_AeArZhWU86ETOoWqg_FI8xXh9P'; 
+const db = window.supabase.createClient(supabaseUrl, supabaseKey);
+
 window.onload = () => { 
     if(document.getElementById('inventoryTableBody')) {
         loadInventory(); 
