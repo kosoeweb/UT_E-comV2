@@ -329,7 +329,7 @@ window.searchProducts = async function(keyword) {
     const btn = document.getElementById('loadMoreBtn');
     
     if(!keyword) {
-        // Search box ရှင်းလိုက်လျှင် Home Page ပုံစံအတိုင်း ပြန်ပြမည်
+        // Search box ရှင်းလိုက်လျှင် သို့မဟုတ် Back နှိပ်လျှင် Home Page ပုံစံအတိုင်း ပြန်ပြမည်
         fetchProducts(); 
         return;
     }
@@ -353,16 +353,19 @@ window.searchProducts = async function(keyword) {
     const visibleFiltered = (filteredData || []).filter(p => p.is_hidden !== true);
     allProducts = visibleFiltered; 
     
-    // Search ရလဒ်ဖြစ်သဖြင့် isGrouped ကို false ထား၍ တန်းစီပြမည်
     renderProducts(visibleFiltered, false);
 
-    // ခေါင်းစဉ်တပ်ပေးခြင်း (See More သို့မဟုတ် Search)
-    if (grid && visibleFiltered.length > 0) {
-        const titleHtml = `<h2 style="width: 100%; grid-column: 1 / -1; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px;">Results for: <span style="color:var(--primary-color, #ff6600);">${keyword}</span></h2>`;
+    // ခေါင်းစဉ်နှင့်အတူ နောက်ပြန်ဆုတ်ရန် Back ခလုတ် ထည့်သွင်းခြင်း
+    if (grid) {
+        const titleHtml = `
+        <div style="width: 100%; grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px;">
+            <h2 style="margin: 0; font-size: 20px;">Category: <span style="color:var(--primary-color, #ff6600);">${keyword}</span></h2>
+            <button onclick="searchProducts('')" style="background: #333; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">⬅ Back to Home</button>
+        </div>`;
+        
         grid.insertAdjacentHTML('afterbegin', titleHtml);
     }
 }
-
 // ==========================================
 // 6. PAGE NAVIGATION & MODALS (Updated)
 // ==========================================
