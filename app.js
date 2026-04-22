@@ -230,9 +230,9 @@ function startHeroSlider(totalSlides) { if(totalSlides <= 1) return; resetSlider
 // 5. PRODUCTS & SEARCH LOGIC
 // ==========================================
 async function fetchProducts() {
+    // .neq စာကြောင်းကို ဖြုတ်လိုက်ပါမည်
     const { data: products, error } = await db.from('ecom_products')
         .select('*')
-        .neq('is_hidden', true) // <--- ဖျောက်ထားသော ပစ္စည်းများကို ဖယ်ထုတ်မည့် စာကြောင်း
         .order('code', { ascending: true })
         .limit(100); 
         
@@ -241,7 +241,11 @@ async function fetchProducts() {
         if(grid) grid.innerHTML = '<p style="color:red;text-align:center;">Database Error.</p>';
         return;
     }
-    allProducts = products || [];
+
+    // Database ကရလာတဲ့ Data များထဲမှ is_hidden အမှန်ခြစ်ထားသော (true ဖြစ်နေသော) ပစ္စည်းများကို JavaScript ဖြင့် ဖယ်ထုတ်ပါမည်
+    const visibleProducts = (products || []).filter(p => p.is_hidden !== true);
+    
+    allProducts = visibleProducts;
     renderProducts(allProducts);
 }
 
@@ -271,9 +275,6 @@ function renderProducts(products) {
 // ==========================================
 // SEARCH LOGIC
 // ==========================================
-// ==========================================
-// SEARCH LOGIC
-// ==========================================
 window.searchProducts = async function(keyword) {
     const catMenu = document.getElementById('categoryMenu');
     if(catMenu) {
@@ -292,10 +293,9 @@ window.searchProducts = async function(keyword) {
     if(btn) btn.style.display = 'none';
     if(grid) grid.innerHTML = '<p style="text-align:center; width:100%;">Searching...</p>';
     
-    // နာမည်ထပ်နေသည့် Error မဖြစ်စေရန် filtered အစား filteredData ဟု ပြောင်းရေးထားပါသည်
+    // .neq စာကြောင်းကို ဖြုတ်လိုက်ပါမည်
     const { data: filteredData, error } = await db.from('ecom_products')
         .select('*')
-        .neq('is_hidden', true)
         .or(`name.ilike.%${keyword}%,code.ilike.%${keyword}%,cat.ilike.%${keyword}%,subcat.ilike.%${keyword}%`)
         .limit(30);
         
@@ -304,8 +304,11 @@ window.searchProducts = async function(keyword) {
         return; 
     }
     
-    allProducts = filteredData || []; 
-    renderProducts(filteredData);
+    // ရှာလို့ရလာတဲ့ အထဲကမှ is_hidden အမှန်ခြစ်ထားသော (true ဖြစ်နေသော) ပစ္စည်းများကို ဖယ်ထုတ်ပါမည်
+    const visibleFiltered = (filteredData || []).filter(p => p.is_hidden !== true);
+
+    allProducts = visibleFiltered; 
+    renderProducts(visibleFiltered);
 }
 
 // ==========================================
