@@ -232,6 +232,7 @@ function startHeroSlider(totalSlides) { if(totalSlides <= 1) return; resetSlider
 async function fetchProducts() {
     const { data: products, error } = await db.from('ecom_products')
         .select('*')
+        .neq('is_hidden', true) // <--- ဖျောက်ထားသော ပစ္စည်းများကို ဖယ်ထုတ်မည့် စာကြောင်း
         .order('code', { ascending: true })
         .limit(100); 
         
@@ -268,11 +269,11 @@ function renderProducts(products) {
 }
 
 window.searchProducts = async function(keyword) {
-    const catMenu = document.getElementById('categoryMenu');
-    if(catMenu) {
-        catMenu.style.display = 'none'; 
-        setTimeout(() => catMenu.style.display = '', 200); 
-    }
+    const { data: filtered, error } = await db.from('ecom_products')
+        .select('*')
+        .neq('is_hidden', true) // <--- ဖျောက်ထားသော ပစ္စည်းများကို ဖယ်ထုတ်မည့် စာကြောင်း
+        .or(`name.ilike.%${keyword}%,code.ilike.%${keyword}%,cat.ilike.%${keyword}%,subcat.ilike.%${keyword}%`)
+        .limit(30);
 
     // Search လုပ်သည့်အခါ Main Page ကို သေချာပေါက်ပြန်ပြပေးရန်
     goBackToMain();
